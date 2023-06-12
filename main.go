@@ -16,11 +16,12 @@ var (
 	objeto    = flag.String("o", "AA003039703BR", "objetos a sere rastreados")
 	usuario   = flag.String("u", "", "nome de usuario de acesso às API dos Correios")
 	senha     = flag.String("p", "", "senha do usuario de acesso às API dos Correios")
-	tempo     = flag.Int("s", 900, "tempo para execucao, padrão 15 minutos")
-	repetir   = flag.Bool("t", false, "repetir indefinidamente")
+	tempo     = flag.Int("s", 15*60, "tempo para execucao, padrão 15 minutos")
 )
 
 func init() {
+	*usuario = os.Getenv("USUARIO_API_CORREIOS")
+	*senha = os.Getenv("SENHA_API_CORREIOS")
 	go token.Start(*urlToken, *usuario, *senha)
 }
 
@@ -59,9 +60,6 @@ func rastreia() {
 				o.Eventos[0].Unidade.Nome,
 				dt,
 			)
-		}
-		if !*repetir {
-			os.Exit(0)
 		}
 		time.Sleep(time.Second * time.Duration(*tempo))
 	}
