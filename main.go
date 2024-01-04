@@ -6,17 +6,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/correiostech/rastro"
-	"github.com/correiostech/token"
+	"github.com/correios/rastro"
+	"github.com/correios/token"
 )
 
 var (
-	urlToken  = flag.String("tk", "https://api.correios.com.br/token/v1/autentica", "url para obter token")
-	urlRastro = flag.String("e", "https://api.correios.com.br/srorastro/v1/objetos/", "endpoint de rastro")
-	objeto    = flag.String("o", "AA003039703BR", "objetos a sere rastreados")
+	urlToken  = flag.String("k", "https://api.correios.com.br/token/v1/autentica", "url para obter token")
+	urlRastro = flag.String("e", "https://api.correios.com.br/srorastro/v1/objetos", "endpoint de rastro")
 	usuario   = flag.String("u", "", "nome de usuario de acesso às API dos Correios")
 	senha     = flag.String("p", "", "senha do usuario de acesso às API dos Correios")
+	objeto    = flag.String("o", "TE123456785BR", "objetos a serem rastreados")
 	tempo     = flag.Int("s", 15*60, "tempo para execucao, padrão 15 minutos")
+	repetir   = flag.Bool("t", false, "repetir a pesquisa indefinidamente")
 )
 
 func init() {
@@ -42,7 +43,7 @@ func rastreia() {
 		if err != nil {
 			log.Println("erro: rastreia objetos 1: " + err.Error())
 		}
-		rastros, err := clientRastro.Rastreia(*objeto, token.Token)
+		rastros, err := clientRastro.Rastreia(*objeto, token.Token, 'U')
 		if err != nil {
 			log.Println(err.Error())
 			continue
@@ -52,7 +53,7 @@ func rastreia() {
 			if err != nil {
 				log.Println(err.Error())
 			}
-			log.Printf("%s: %s %s %s %s %s",
+			log.Printf("%s: %s %s %s %sem %s",
 				o.CodigoObjeto,
 				o.Eventos[0].Codigo,
 				o.Eventos[0].Tipo,
@@ -60,6 +61,9 @@ func rastreia() {
 				o.Eventos[0].Unidade.Nome,
 				dt,
 			)
+		}
+		if !*repetir {
+			os.Exit(0)
 		}
 		time.Sleep(time.Second * time.Duration(*tempo))
 	}
